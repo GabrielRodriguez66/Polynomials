@@ -22,7 +22,7 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public void add(E obj) {
-		if(size == elements.length) changeCapacity(elements.length);
+		if(size == elements.length) changeCapacity(elements.length*2);
 		elements[size] = obj;
 		size++;
 	}
@@ -55,10 +55,13 @@ public class ArrayList<E> implements List<E> {
 
 	@Override
 	public int removeAll(E obj) { 
-		int count = 0;
-		while(this.contains(obj)) {
-			this.remove(obj);
-			count++;
+		int count = 0, i = 0;
+		while(i<size) {
+			if(elements[i].equals(obj)) {
+				this.remove(i);
+				i = 0;
+				count++;
+			}
 		}
 		return count;
 	}
