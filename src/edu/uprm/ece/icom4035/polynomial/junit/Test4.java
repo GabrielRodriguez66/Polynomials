@@ -17,7 +17,6 @@ public class Test4 {
 	@Before
 	public void setUp() throws Exception {
 		TermListFactory.setFactory("linked");
-		System.out.println(TermListFactory.newListFactory().getClass().getName());
 		 P1 = new PolynomialImp("8x^2+1");
 		 P2 = new PolynomialImp("4x^2+2");
 

@@ -1,8 +1,10 @@
 package edu.uprm.ece.icom4035.polynomial;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import edu.uprm.ece.icom4035.list.ArrayList;
 import edu.uprm.ece.icom4035.list.List;
 import edu.uprm.ece.icom4035.list.ListFactory;
 
@@ -21,32 +23,97 @@ public class PolynomialImp implements Polynomial {
 
 	@Override
 	public Polynomial add(Polynomial P2) {
-		// TODO Auto-generated method stub
-		return null;
+		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
+		
+		for(Term t: this) {
+			resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
+		}
+		
+		for(Term t:P2) {
+			if(!resultExpCoeffMap.containsKey(t.getExponent())) resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
+			else resultExpCoeffMap.put(t.getExponent(), t.getCoefficient()+resultExpCoeffMap.get(t.getExponent()));
+		}
+		
+		PolynomialImp ptr = new PolynomialImp();
+		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);		
+		for(int i = 0; i<resultExpCoeffMap.size();i++) {
+			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
+			if(newCoeff != 0) {
+				int newExp = keys[keys.length-1-i];
+				TermImp newTerm = new TermImp(newCoeff,newExp);
+				ptr.addTerm(newTerm);
+			}
+		}
+		
+		return ptr;
 	}
 
 	@Override
 	public Polynomial subtract(Polynomial P2) {
-		// TODO Auto-generated method stub
-		return null;
+	HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
+		
+		for(Term t: this) {
+			resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
+		}
+		
+		for(Term t:P2) {
+			if(!resultExpCoeffMap.containsKey(t.getExponent())) resultExpCoeffMap.put(t.getExponent(), -t.getCoefficient());
+			else resultExpCoeffMap.put(t.getExponent(), resultExpCoeffMap.get(t.getExponent())-t.getCoefficient());
+		}
+		
+		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);
+		PolynomialImp ptr = new PolynomialImp();
+		for(int i = 0; i<resultExpCoeffMap.size();i++) {
+			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
+			if(newCoeff != 0) {
+				int newExp = keys[keys.length-1-i];
+				TermImp newTerm = new TermImp(newCoeff,newExp);
+				ptr.addTerm(newTerm);
+			}
+		}
+		
+		if(ptr.getNumberOfTerms() == 0) return new  PolynomialImp("0");
+		return ptr;
 	}
 
 	@Override
-	public Polynomial multiply(Polynomial P2) {
-		// TODO Auto-generated method stub
-		return null;
+	public Polynomial multiply(Polynomial P2) {// TODO
+		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
+
+		for(Term t: this) {
+			double tCoeff = t.getCoefficient();
+			for(Term t2:P2) {
+				int newExp = t.getExponent() + t2.getExponent();
+				if(!resultExpCoeffMap.containsKey(newExp)) resultExpCoeffMap.put(newExp, t2.getCoefficient()*tCoeff);
+				else resultExpCoeffMap.put(newExp, resultExpCoeffMap.get(newExp)+t2.getCoefficient()*tCoeff);
+			}
+		}
+		
+		PolynomialImp ptr = new PolynomialImp();
+		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);		
+		for(int i = 0; i<resultExpCoeffMap.size();i++) {
+			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
+			if(newCoeff != 0) {
+				int newExp = keys[keys.length-1-i];
+				TermImp newTerm = new TermImp(newCoeff,newExp);
+				ptr.addTerm(newTerm);
+			}
+		}
+		
+		if(ptr.getNumberOfTerms() == 0) return new  PolynomialImp("0");
+		return ptr;
 	}
 
 	@Override
 	public Polynomial multiply(double c) {
 		Polynomial ptr = new PolynomialImp();
 		if(c == 0) return new PolynomialImp("0");
-		
+
 		for(Term t:this) {
 			Term newTerm = new TermImp(t.getCoefficient() * c, t.getExponent());
 			((PolynomialImp)ptr).addTerm(newTerm);
 		}
-		
+
 		return ptr;
 	}
 
