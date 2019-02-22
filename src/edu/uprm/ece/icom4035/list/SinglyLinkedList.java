@@ -4,11 +4,11 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class SinglyLinkedList<E> implements List<E> {
-	private Node header;
+	private Node<E> header;
 	private int size;
 
 	public SinglyLinkedList() {
-		this.header = new Node();
+		this.header = new Node<E>();
 		this.size = 0;
 	}
 
@@ -20,7 +20,7 @@ public class SinglyLinkedList<E> implements List<E> {
 
 	@Override
 	public void add(E obj) {
-		Node nuevo = new Node(obj);
+		Node<E>nuevo = new Node<E>(obj);
 		this.findNodeAt(size-1).setNext(nuevo);
 		size++;
 	}
@@ -29,8 +29,8 @@ public class SinglyLinkedList<E> implements List<E> {
 	public void add(int index, E obj) throws IndexOutOfBoundsException {
 		if(index<0 || index>this.size) throw new IndexOutOfBoundsException("add: Invalid index = "+index);
 
-		Node prev = this.findNodeAt(index-1);
-		Node nuevo = new Node(obj, prev.getNext());
+		Node<E> prev = this.findNodeAt(index-1);
+		Node<E> nuevo = new Node<E>(obj, prev.getNext());
 		prev.setNext(nuevo);
 		size++;
 	}
@@ -47,8 +47,8 @@ public class SinglyLinkedList<E> implements List<E> {
 	@Override
 	public boolean remove(int index)  throws IndexOutOfBoundsException {
 		if(index<0 || index>=size) throw new IndexOutOfBoundsException("remove: Invalid index = "+index);
-		Node prev = this.findNodeAt(index-1);
-		Node ntr = prev.getNext();
+		Node<E> prev = this.findNodeAt(index-1);
+		Node<E> ntr = prev.getNext();
 		prev.setNext(ntr.getNext());
 		ntr.clear();
 		size--;
@@ -57,10 +57,10 @@ public class SinglyLinkedList<E> implements List<E> {
 
 	@Override
 	public int removeAll(E obj) {
-		int count = 0; Node curr = header;
+		int count = 0; Node<E> curr = header;
 		while(curr.getNext() != null) {
 			if(curr.getNext().getElement().equals(obj)) {
-				Node ntr = curr.getNext();
+				Node<E> ntr = curr.getNext();
 				curr.setNext(ntr.getNext());
 				ntr.clear();
 				count++;
@@ -81,7 +81,7 @@ public class SinglyLinkedList<E> implements List<E> {
 	@Override
 	public E set(int index, E obj)throws IndexOutOfBoundsException {
 		if(index<0 || index>=size) throw new IndexOutOfBoundsException("get: Invalid index = "+index);
-		Node nts = this.findNodeAt(index);
+		Node<E> nts = this.findNodeAt(index);
 		E etr = nts.getElement();
 		nts.setElement(obj);
 		return etr; 
@@ -129,9 +129,9 @@ public class SinglyLinkedList<E> implements List<E> {
 
 	@Override
 	public void clear() {
-		Node c = header;
+		Node<E> c = header;
 		while(c != null) {
-			Node ntc = c;
+			Node<E> ntc = c;
 			c = c.getNext();
 			ntc.clear();
 		}
@@ -144,12 +144,13 @@ public class SinglyLinkedList<E> implements List<E> {
 	}
 
 	// -------------- Private Methods and Classes ------------ \\
-
-	private class Node{
+	
+	// Class for the Linked List nodes
+	private static class Node<E>{
 		private E element;
-		private Node next;
+		private Node<E> next;
 
-		public Node(E e, Node n) {
+		public Node(E e, Node<E> n) {
 			this.element = e;
 			this.next = n;
 		}
@@ -166,7 +167,7 @@ public class SinglyLinkedList<E> implements List<E> {
 			return this.element;
 		}
 
-		public Node getNext() {
+		public Node<E> getNext() {
 			return next;
 		}
 
@@ -174,7 +175,7 @@ public class SinglyLinkedList<E> implements List<E> {
 			this.element = e;
 		}
 
-		public void setNext(Node n) {
+		public void setNext(Node<E> n) {
 			this.next = n;
 		}
 
@@ -185,9 +186,9 @@ public class SinglyLinkedList<E> implements List<E> {
 	}
 
 
-	//Inner class for ArrayList Iterator implementation
+	//Inner class of the Iterator implementation for this list
 	private class SinglyLinkedListIterator implements Iterator<E>{
-		private Node current;
+		private Node<E> current;
 
 		public SinglyLinkedListIterator() {
 			current = header.getNext();
@@ -206,10 +207,11 @@ public class SinglyLinkedList<E> implements List<E> {
 			return etr;
 		}
 	}
-
-	private Node findNodeAt(int idx) {
+	
+	//Helper method to find node at specified index
+	private Node<E> findNodeAt(int idx) {
 		if(idx==-1) return header;
-		Node c = header.getNext();
+		Node<E> c = header.getNext();
 		for(int i=0;i<idx;i++) {
 			c = c.getNext();
 		}

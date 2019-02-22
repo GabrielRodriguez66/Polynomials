@@ -19,5 +19,14 @@ public interface Term {
 	 * @return a double of each term evaluate
 	 */
 	public double evaluate(double x);
+
+	/**
+	 * Check if the terms are similar, the current one
+	 * term and the term provided T2
+	 * @param T2 is the polynomial to check
+	 * @return false if the term is not the same
+	 * and true if is similar
+	 */
+	boolean equals(Term T2);
 	
 }

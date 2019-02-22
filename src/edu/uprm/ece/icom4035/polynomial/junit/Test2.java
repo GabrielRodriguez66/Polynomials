@@ -103,7 +103,7 @@ public class Test2 {
 	public void testMultiplyDouble() {
 		Polynomial P3 = P1.multiply(0);
 		Polynomial P4 = new PolynomialImp("0");
-		System.out.printf("Multiply -> P3: %s, P4: %s\n", P3, P4);
+		System.out.printf("Multiply-> P3: %s, P4: %s\n", P3, P4);
 		assertTrue(P3.equals(P4));
 	}
 
