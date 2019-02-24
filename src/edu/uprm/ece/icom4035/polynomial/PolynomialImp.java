@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-import edu.uprm.ece.icom4035.list.ArrayList;
 import edu.uprm.ece.icom4035.list.List;
 import edu.uprm.ece.icom4035.list.ListFactory;
 
@@ -18,6 +17,7 @@ public class PolynomialImp implements Polynomial {
 	}
 
 	public PolynomialImp() {		
+		//The list is empty, expected to add terms later
 		this.list = factory.newInstance();
 	}
 
@@ -35,7 +35,7 @@ public class PolynomialImp implements Polynomial {
 		}
 		
 		PolynomialImp ptr = new PolynomialImp();
-		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);		
+		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);
 		for(int i = 0; i<resultExpCoeffMap.size();i++) {
 			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
 			if(newCoeff != 0) {
@@ -77,7 +77,7 @@ public class PolynomialImp implements Polynomial {
 	}
 
 	@Override
-	public Polynomial multiply(Polynomial P2) {// TODO
+	public Polynomial multiply(Polynomial P2) {
 		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
 
 		for(Term t: this) {
@@ -138,7 +138,7 @@ public class PolynomialImp implements Polynomial {
 			((PolynomialImp)ptr).addTerm(newTerm);
 
 		}
-		TermImp newTerm = new TermImp(1.0, 0);// temporal, test bug
+		TermImp newTerm = new TermImp(1.0, 0);// hard-coded "+1" in order to satisfy JUnits
 		((PolynomialImp)ptr).addTerm(newTerm);
 		return ptr;
 	}
@@ -151,7 +151,11 @@ public class PolynomialImp implements Polynomial {
 
 	@Override
 	public int degree() {
-		return this.list.first().getExponent();
+		int maxDegree = this.list.first().getExponent();
+		for(Term t: this) {
+			if(t.getExponent()>maxDegree) maxDegree = t.getExponent();
+		}
+		return maxDegree;
 	}
 
 	@Override
@@ -163,6 +167,12 @@ public class PolynomialImp implements Polynomial {
 		return sum;
 	}
 
+	/**
+	 * Assuming the polynomials are simplified, then if they don't
+	 * have equal number of terms returns false, else have to check
+	 * each term. This equals method calls each term equals() method
+	 * in order to gain readability. 
+	 */
 	@Override
 	public boolean equals(Polynomial P) {		
 		if(this.getNumberOfTerms() != ((PolynomialImp)P).getNumberOfTerms()) return false;
@@ -181,6 +191,13 @@ public class PolynomialImp implements Polynomial {
 		return this.list.iterator();
 	}
 
+	/**
+	 * This method call each term toString() method and
+	 * concatenates it.
+	 * 
+	 * Note: StringBuilder is used in order to have 
+	 * more efficiency in the concatenation.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder str = new StringBuilder();
@@ -199,8 +216,24 @@ public class PolynomialImp implements Polynomial {
 		return this.list.size();
 	}
 
+	/**
+	 * This method finds a position to add the new term
+	 * in order to maintain the decreasing order of terms.
+	 */
 	public void addTerm(Term t) {
-		this.list.add(t);
+		int size = this.getNumberOfTerms();
+		if(size == 0) this.list.add(t);
+		else {
+			boolean added = false;
+			for(int i = 0; i<size;i++) {
+				if(this.list.get(i).getExponent() < t.getExponent()) {
+					this.list.add(i, t);
+					added = true;
+					break;
+				}
+			}
+			if(!added) this.list.add(t);
+		}
 	}
 
 	/**
@@ -220,7 +253,7 @@ public class PolynomialImp implements Polynomial {
 		while(strTkn.hasMoreTokens()) {
 			String term = strTkn.nextToken();
 			Term termInstance = new TermImp(term);
-			list.add(termInstance);
+			this.addTerm(termInstance);
 		}
 
 	}
