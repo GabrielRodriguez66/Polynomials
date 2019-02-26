@@ -137,6 +137,10 @@ public class ArrayList<E> implements List<E> {
 
 	// -------------- Private Methods and Classes ------------ \\
 
+	/**
+	 * This helper method is called any time the Array is full
+	 * and the capacity needs to be changed
+	 */
 	@SuppressWarnings("unchecked")
 	private void changeCapacity(int newCap) { 
 		E[] newElement = (E[]) new Object[newCap]; 
@@ -147,20 +151,28 @@ public class ArrayList<E> implements List<E> {
 		elements = newElement; 
 	}
 
-	//Move elements one position to the right from a starting index specified
+	/**
+	 * This helper method moves elements one position to the right
+	 * starting from an index specified.
+	 */
 	private void rotateToR(int index) { 
 		for (int pos = this.size -1; pos >= index; pos--)
 			elements[pos+1] = elements[pos]; 
 	}
 
-	//Move elements one position to the left from a starting index specified
+	/**
+	 * This helper method moves elements one position to the left
+	 * starting from an index specified
+	 */
 	private void rotateToL(int index) { 
 		for (int pos = index+1; pos <= this.size-1; pos++)
 			elements[pos-1] = elements[pos]; 
 		elements[size-1] = null;
 	}
 
-	//Inner class for ArrayList Iterator implementation
+	/**
+	 * Inner class for ArrayList Iterator implementation
+	 */
 	private class ArrayListIterator implements Iterator<E>{
 		private int current;
 

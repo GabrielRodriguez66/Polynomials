@@ -145,7 +145,9 @@ public class SinglyLinkedList<E> implements List<E> {
 
 	// -------------- Private Methods and Classes ------------ \\
 	
-	// Class for the Linked List nodes
+	/**
+	 * Class for the Nodes used in this implementation of Linked List 
+	 */
 	private static class Node<E>{
 		private E element;
 		private Node<E> next;
@@ -186,7 +188,10 @@ public class SinglyLinkedList<E> implements List<E> {
 	}
 
 
-	//Inner class of the Iterator implementation for this list
+	/**
+	 * Inner class of the Iterator implementation for this type
+	 * of Linked List.
+	 */
 	private class SinglyLinkedListIterator implements Iterator<E>{
 		private Node<E> current;
 
@@ -208,7 +213,10 @@ public class SinglyLinkedList<E> implements List<E> {
 		}
 	}
 	
-	//Helper method to find node at specified index
+	/**
+	 * This helper method is used to find a node at a 
+	 * specified index.
+	 */
 	private Node<E> findNodeAt(int idx) {
 		if(idx==-1) return header;
 		Node<E> c = header.getNext();

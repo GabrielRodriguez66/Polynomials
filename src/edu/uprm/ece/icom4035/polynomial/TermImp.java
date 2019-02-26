@@ -6,30 +6,30 @@ public class TermImp implements Term {
 
 	/**
 	 * This constructor can take a polynomial term in String form
-	 * and take the necessary values in order to init the instance
-	 * fields. 
-	 * 
-	 * @param term
+	 * and take the necessary values in order to initialize the
+	 * instance fields. 
 	 */
 	public TermImp(String term) {
 
-		if(term.contains("x^")) {
+		if(term.contains("x^")) { //Contains an exponent != 1
 
 			if(term.startsWith("x")) this.setCoefficient(1);
+			else if(term.startsWith("-x")) this.setCoefficient(-1);
 			else this.setCoefficient(Double.valueOf(term.substring(0, term.indexOf("x"))));
 
 			int exp = Integer.valueOf(term.substring(term.indexOf("^")+1,term.length()));
 			if(exp < 0) throw new IllegalArgumentException("Polynomials cannot have negative exponents.");
 			this.setExponent(exp);
 
-		}else if(term.contains("x")) {
+		}else if(term.contains("x")) { //Contains an exponent == 1
 
 			this.setExponent(1);
 			if(term.startsWith("x")) this.setCoefficient(1);
+			else if(term.startsWith("-x")) this.setCoefficient(-1);
 			else {
 				this.setCoefficient(Double.valueOf(term.substring(0, term.indexOf("x"))));
 			}
-		}else {
+		}else { // Does not contains an x
 			this.setExponent(0);
 			this.setCoefficient(Double.valueOf(term));
 		}
@@ -67,7 +67,12 @@ public class TermImp implements Term {
 	public void setExponent(int exponent) {
 		this.exponent = exponent;
 	}
-
+	
+	/**
+	 * This method returns the String representation of the term
+	 * 
+	 * Note: This helps the String representation of a Polynomial
+	 */
 	@Override
 	public String toString() {
 		if(this.getExponent() == 0) return String.format("%.2f", this.getCoefficient())+"";
