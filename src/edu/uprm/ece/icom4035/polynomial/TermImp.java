@@ -1,6 +1,6 @@
 package edu.uprm.ece.icom4035.polynomial;
 
-public class TermImp implements Term {
+public class TermImp implements Term, Comparable<Term>{
 	private double coefficient;
 	private int exponent;
 
@@ -83,6 +83,11 @@ public class TermImp implements Term {
 		else str.append(String.format("%.2f", this.getCoefficient())+"x^"+this.getExponent());
 
 		return str.toString();
+	}
+
+	@Override
+	public int compareTo(Term t2) {
+		return t2.getExponent() - this.getExponent();
 	}
 
 }

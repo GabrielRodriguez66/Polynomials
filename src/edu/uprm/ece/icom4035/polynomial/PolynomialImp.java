@@ -1,11 +1,14 @@
 package edu.uprm.ece.icom4035.polynomial;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import edu.uprm.ece.icom4035.list.ArrayList;
 import edu.uprm.ece.icom4035.list.List;
 import edu.uprm.ece.icom4035.list.ListFactory;
+import edu.uprm.ece.icom4035.list.SinglyLinkedList;
 
 public class PolynomialImp implements Polynomial {
 	private List<Term> list;
@@ -14,50 +17,114 @@ public class PolynomialImp implements Polynomial {
 	public PolynomialImp(String poly) {
 		this.list = factory.newInstance();
 		this.parseTerms(poly);
+		this.sortByExponents();
 	}
 
 	public PolynomialImp() {		
 		//The list is empty, expected to add terms later
 		this.list = factory.newInstance();
 	}
-	
+
 	/**
 	 * This method returns a new Polynomial, which is the result
 	 * of the sum of the target object and P2.
 	 * 
-	 * To simplify the process of searching for similar terms,
-	 * the method is implemented with HashMap, mapping exponents
-	 * to coefficient values.
+	 * The algorithm that search for similar terms is inspired in the
+	 * merge method of the Merge Sort
 	 */
 	@Override
 	public Polynomial add(Polynomial P2) {
-		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
 
+		// p1 contains this.list elements, purpose: to mutate
+		List<Term> p1 = new SinglyLinkedList<>();
 		for(Term t: this) {
-			resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
+			p1.add(t);
+		}
+		// p2 contains P2 elements, purpose: to mutate
+		List<Term> p2 = new SinglyLinkedList<>();
+		for(Term t: P2) {
+			p2.add(t);
 		}
 
-		for(Term t:P2) {
-			if(!resultExpCoeffMap.containsKey(t.getExponent())) resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
-			else resultExpCoeffMap.put(t.getExponent(), t.getCoefficient()+resultExpCoeffMap.get(t.getExponent()));
-		}
+		PolynomialImp ptr = new PolynomialImp(); // Polynomial to return
 
-		/**
-		 * In this block, the keys (exponents) are retrieved of the HashMap,
-		 * and used to search the value and create the Term instance.
-		 * Is assumed that the Array keys[] have the keys in order.
-		 */
-		PolynomialImp ptr = new PolynomialImp();
-		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);
-		for(int i = 0; i<resultExpCoeffMap.size();i++) {
-			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
-			if(newCoeff != 0) {
-				int newExp = keys[keys.length-1-i];
-				TermImp newTerm = new TermImp(newCoeff,newExp);
-				ptr.addTerm(newTerm);
+		if(p1.first().getExponent() >= p2.first().getExponent()) {
+
+			for(Term t1:this) {
+
+				if(!p2.isEmpty()) {
+
+					Term t2 = p2.get(0);
+					if(t1.getExponent() == t2.getExponent()) { //similar terms
+
+						double newCoeff = t1.getCoefficient()+t2.getCoefficient();
+						if(newCoeff != 0) {
+							TermImp newTerm = new TermImp(newCoeff,t1.getExponent());
+							ptr.addTerm(newTerm);
+						}
+						p1.remove(0); p2.remove(0);
+
+					}else {
+						p1.remove(0);
+						TermImp newTerm = new TermImp(t1.getCoefficient(),t1.getExponent());
+						ptr.addTerm(newTerm);
+					}
+				}else {
+					p1.remove(0);
+					TermImp newTerm = new TermImp(t1.getCoefficient(),t1.getExponent());
+					ptr.addTerm(newTerm);
+				}
+
+			}
+
+			//Adding to ptr the left terms in p2
+			if(p2.size() != 0) {
+				while(p2.size() != 0) {
+					Term t2 = p2.get(0);
+					TermImp newTerm = new TermImp(t2.getCoefficient(),t2.getExponent());
+					ptr.addTerm(newTerm);
+					p2.remove(0);
+				}
+			}
+		} else {
+
+			for(Term t2:P2) {
+
+				if(!p1.isEmpty()) {
+
+					Term t = p1.get(0);
+					if(t.getExponent() == t2.getExponent()) { //similar terms
+						double newCoeff = t.getCoefficient()+t2.getCoefficient();
+						if(newCoeff != 0) {
+							TermImp newTerm = new TermImp(newCoeff,t.getExponent());
+							ptr.addTerm(newTerm);
+						}
+						p1.remove(0); p2.remove(0);
+
+					}else {
+						p2.remove(0);
+						TermImp newTerm = new TermImp(t2.getCoefficient(),t2.getExponent());
+						ptr.addTerm(newTerm);
+					}
+				}else {
+					p2.remove(0);
+					TermImp newTerm = new TermImp(t2.getCoefficient(),t2.getExponent());
+					ptr.addTerm(newTerm);
+				}
+
+			}
+
+			//Adding to ptr the left terms in p1
+			if(p1.size() != 0) {
+				while(p1.size() != 0) {
+					Term t = p1.get(0);
+					TermImp newTerm = new TermImp(t.getCoefficient(),t.getExponent());
+					ptr.addTerm(newTerm);
+					p1.remove(0);
+				}
 			}
 		}
-		
+
 		if(ptr.getNumberOfTerms() == 0) return new PolynomialImp("0"); //Special case
 		return ptr;
 	}
@@ -66,38 +133,99 @@ public class PolynomialImp implements Polynomial {
 	 * This method returns a new Polynomial, which is the result
 	 * of the difference of the target object and P2.
 	 * 
-	 * To simplify the process of searching for similar terms,
-	 * the method is implemented with HashMap, mapping exponents
-	 * to coefficient values.
+	 * The algorithm that search for similar terms is inspired in the
+	 * merge method of the Merge Sort
 	 */
 	@Override
 	public Polynomial subtract(Polynomial P2) {
-		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
 
+		// p1 contains this.list elements, purpose: to mutate
+		List<Term> p1 = new SinglyLinkedList<>();
 		for(Term t: this) {
-			resultExpCoeffMap.put(t.getExponent(), t.getCoefficient());
+			p1.add(t);
+		}
+		// p2 contains P2 elements, purpose: to mutate
+		List<Term> p2 = new SinglyLinkedList<>();
+		for(Term t: P2) {
+			p2.add(t);
 		}
 
-		for(Term t:P2) {
-			if(!resultExpCoeffMap.containsKey(t.getExponent())) resultExpCoeffMap.put(t.getExponent(), -t.getCoefficient());
-			else resultExpCoeffMap.put(t.getExponent(), resultExpCoeffMap.get(t.getExponent())-t.getCoefficient());
-		}
+		PolynomialImp ptr = new PolynomialImp(); // Polynomial to return
 
-		/**
-		 * In this block, the keys (exponents) are retrieved of the HashMap,
-		 * and used to search the value and create the Term instance.
-		 * Is assumed that the Array keys[] have the keys in order.
-		 */
-		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);
-		PolynomialImp ptr = new PolynomialImp();
-		for(int i = 0; i<resultExpCoeffMap.size();i++) {
-			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
-			if(newCoeff != 0) {
-				int newExp = keys[keys.length-1-i];
-				TermImp newTerm = new TermImp(newCoeff,newExp);
-				ptr.addTerm(newTerm); 
+		if(p1.first().getExponent() >= p2.first().getExponent()) {
+
+			for(Term t1:this) {
+
+				if(!p2.isEmpty()) {
+					Term t2 = p2.get(0);
+					if(t1.getExponent() == t2.getExponent()) { //similar terms
+
+						double newCoeff = t1.getCoefficient()-t2.getCoefficient();
+						if(newCoeff != 0) {
+							TermImp newTerm = new TermImp(newCoeff,t1.getExponent());
+							ptr.addTerm(newTerm);
+						}
+						p1.remove(0); p2.remove(0);
+
+					}else {
+						p1.remove(0);
+						TermImp newTerm = new TermImp(t1.getCoefficient(),t1.getExponent());
+						ptr.addTerm(newTerm);
+					}
+				}else {
+					p1.remove(0);
+					TermImp newTerm = new TermImp(t1.getCoefficient(),t1.getExponent());
+					ptr.addTerm(newTerm);				}
+
+			}
+
+			//Adding to ptr the left terms in p2
+			if(p2.size() != 0) {
+				while(p2.size() != 0) {
+					Term t2 = p2.get(0);
+					TermImp newTerm = new TermImp(-t2.getCoefficient(),t2.getExponent());
+					ptr.addTerm(newTerm);
+					p2.remove(0);
+				}
+			}
+
+		} else {
+
+			for(Term t2:P2) {
+
+				if(!p1.isEmpty()) {
+					Term t = p1.get(0);
+					if(t.getExponent() == t2.getExponent()) { //similar terms
+						double newCoeff = t.getCoefficient()-t2.getCoefficient();
+						if(newCoeff != 0) {
+							TermImp newTerm = new TermImp(newCoeff,t.getExponent());
+							ptr.addTerm(newTerm);
+						}
+						p1.remove(0); p2.remove(0);
+					}else {
+						p2.remove(0);
+						TermImp newTerm = new TermImp(-t2.getCoefficient(),t2.getExponent());
+						ptr.addTerm(newTerm);
+					}
+				}else {
+					p2.remove(0);
+					TermImp newTerm = new TermImp(-t2.getCoefficient(),t2.getExponent());
+					ptr.addTerm(newTerm);
+				}
+
+			}
+
+			//Adding to ptr the left terms in p1
+			if(p1.size() != 0) {
+				while(p1.size() != 0) {
+					Term t = p1.get(0);
+					TermImp newTerm = new TermImp(t.getCoefficient(),t.getExponent());
+					ptr.addTerm(newTerm);
+					p1.remove(0);
+				}
 			}
 		}
+
 
 		if(ptr.getNumberOfTerms() == 0) return new PolynomialImp("0"); //Special case
 		return ptr;
@@ -106,41 +234,42 @@ public class PolynomialImp implements Polynomial {
 	/**
 	 * This method returns a new Polynomial, which is the result
 	 * of the product of the target object and P2.
-	 * 
-	 * In order to simplify the similar terms that are generated
-	 * in the process, the method is implemented with HashMap, 
-	 * mapping exponents to coefficient values.
 	 */
 	@Override
 	public Polynomial multiply(Polynomial P2) {
-		HashMap<Integer,Double> resultExpCoeffMap = new HashMap<Integer,Double>();
-
+		if(((PolynomialImp)P2).toString().equals("0.00") || this.toString().equals("0.00"))
+			return new  PolynomialImp("0");  // Special Case
+		
+		PolynomialImp tempResult = new PolynomialImp(); //This polynomial can contain similar terms
+		
 		for(Term t: this) {
-			double tCoeff = t.getCoefficient();
 			for(Term t2:P2) {
 				int newExp = t.getExponent() + t2.getExponent();
-				if(!resultExpCoeffMap.containsKey(newExp)) resultExpCoeffMap.put(newExp, t2.getCoefficient()*tCoeff);
-				else resultExpCoeffMap.put(newExp, resultExpCoeffMap.get(newExp)+t2.getCoefficient()*tCoeff);
+				double newCoeff = t.getCoefficient()*t2.getCoefficient();
+				tempResult.addTerm(new TermImp(newCoeff, newExp));
 			}
 		}
 
+		tempResult.sortByExponents(); // Sort terms in decreasing order of exponents
+		
+		PolynomialImp ptr = new PolynomialImp(); //This polynomial will contain unique exponents
+		int exp = tempResult.degree(); double coeff = 0; // Initial values 
+		Iterator<Term> itr = tempResult.iterator();
+		
 		/**
-		 * In this block, the keys (exponents) are retrieved of the HashMap,
-		 * and used to search the value and create the Term instance.
-		 * Is assumed that the Array keys[] have the keys in order.
+		 * Adding similar terms, in order to simplify the expression
 		 */
-		PolynomialImp ptr = new PolynomialImp();
-		Integer[]  keys = resultExpCoeffMap.keySet().toArray(new Integer[0]);		
-		for(int i = 0; i<resultExpCoeffMap.size();i++) {
-			double newCoeff = resultExpCoeffMap.get(keys[keys.length-1-i]);
-			if(newCoeff != 0) {
-				int newExp = keys[keys.length-1-i];
-				TermImp newTerm = new TermImp(newCoeff,newExp);
-				ptr.addTerm(newTerm);
-			}
+		while(itr.hasNext()) {
+			Term t = itr.next();
+			if(t.getExponent() != exp) {
+				ptr.addTerm(new TermImp(coeff,exp));
+				exp = t.getExponent();
+				coeff = t.getCoefficient();
+			}else coeff += t.getCoefficient();
+			
+			if(!itr.hasNext()) ptr.addTerm(new TermImp(coeff,exp)); //If there is no terms left, add one last term
 		}
-
-		if(ptr.getNumberOfTerms() == 0) return new  PolynomialImp("0"); // Special Case
+		
 		return ptr;
 	}
 
@@ -224,7 +353,7 @@ public class PolynomialImp implements Polynomial {
 	public int degree() {
 		return this.list.first().getExponent();
 	}
-	
+
 	/**
 	 * This method returns the result of the evaluation of x
 	 * in the target object. The implementation calls the 
@@ -319,5 +448,36 @@ public class PolynomialImp implements Polynomial {
 		}
 
 	}
+	
+	/**
+	 * This comparator will be used to sort the polynomial in decreasing order
+	 * of exponents.
+	 */
+	private static class TermsComparator<Term> implements Comparator<Term> {
+		public int compare(Term t1, Term t2) {
+			try { 
+				return ((Comparable<Term>) t1).compareTo(t2); 
+			} catch (ClassCastException e) { 
+				throw new IllegalArgumentException("Instantiated data type must be Comparable");
+			}
+		} 
+	}
+	
+	/**
+	 * Insertion sort algorithm using the comparator implemented for
+	 * polynomial terms.
+	 */
+	public void sortByExponents() {
+		Comparator<Term> cmp = new TermsComparator<>();
+		for (int i=2; i<=this.list.size(); i++) { 
+			int j = i-2; 
+			Term v = this.list.get(i-1); 
+			while (j >= 0 && cmp.compare(v, this.list.get(j)) < 0) { 
+				this.list.set(j+1,this.list.get(j)); 
+				j--;
+			}
+			this.list.set(j+1, v); 
 
+		}
+	}
 }
